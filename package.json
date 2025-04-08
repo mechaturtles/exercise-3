@@ -1,5 +1,5 @@
 {
-  "name": "my-turborepo",
+  "name": "obv-exercise",
   "private": true,
   "scripts": {
     "build": "turbo run build",
