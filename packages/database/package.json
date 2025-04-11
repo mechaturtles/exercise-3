@@ -1,0 +1,36 @@
+{
+  "name": "@repo/database",
+  "version": "1.0.0",
+  "description": "",
+  "main": "./dist/index.js",
+  "source": "./src/index.ts",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist/**"
+  ],
+  "scripts": {
+    "lint": "eslint . --max-warnings 0",
+    "build": "tsc",
+    "generate": "drizzle-kit generate",
+    "check": "drizzle-kit check",
+    "migrate": "drizzle-kit migrate"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "drizzle-orm": "~0.41.0",
+    "drizzle-zod": "^0.7.1",
+    "postgres": "^3.4.4",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@repo/tsconfig": "workspace:*",
+    "@types/node": "^17.0.12",
+    "dotenv": "^16.4.5",
+    "drizzle-kit": "0.30.6",
+    "eslint": "^7.32.0",
+    "ts-node": "^10.9.1",
+    "typescript": "5.2.2"
+  }
+}
