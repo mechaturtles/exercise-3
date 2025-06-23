@@ -1,0 +1,24 @@
+{
+  "name": "etl",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "echo 'Add dev script here'",
+    "build": "echo 'Add build script here'",
+    "test": "echo 'Add test script here'",
+    "lint": "echo 'Add lint script here'"
+  },
+  "dependencies": {
+    "@repo/database": "workspace:*",
+    "axios": "^1.10.0",
+    "drizzle-orm": "~0.41.0",
+    "drizzle-zod": "^0.7.1",
+    "postgres": "^3.4.4",
+    "zod": "^3.25.67"
+  },
+  "devDependencies": {
+    "@repo/eslint-config": "workspace:*",
+    "@repo/tsconfig": "workspace:*",
+    "tsx": "^4.19.3"
+  }
+}
