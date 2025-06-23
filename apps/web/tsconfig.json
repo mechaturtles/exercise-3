@@ -4,6 +4,7 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["./*"],
+      "@repo/ui/*": ["../../packages/ui/src/*"],
     },
     "strictNullChecks": true,
     "plugins": [{ "name": "next" }]
