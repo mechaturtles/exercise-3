@@ -2,6 +2,9 @@
   "extends": "@repo/tsconfig/nextjs.json",
   "compilerOptions": {
     "baseUrl": ".",
+    "paths": {
+      "@/*": ["./*"],
+    },
     "strictNullChecks": true,
     "plugins": [{ "name": "next" }]
   },
