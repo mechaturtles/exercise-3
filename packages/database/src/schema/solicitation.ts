@@ -1,19 +1,25 @@
-import { text, integer, serial, pgTable } from "drizzle-orm/pg-core";
+import { text, integer, varchar, date, serial, pgTable } from "drizzle-orm/pg-core";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 
 export const solicitations = pgTable("solicitations", {
   id: serial("id").primaryKey(), // Local PK, don't trust external
-  solicitationId: text("solicitation_id"), // External ID 
-  solicitationTitle: text("solicitation_title"),
-  solicitationNumber: text("solicitation_number"),
-  program: text("program"),
-  phase: text("phase"),
-  agency: text("agency"),
-  branch: text("branch"),
-  solicitationYear: text("solicitation_year"),
-  releaseDate: text("release_date"),
-  openDate: text("open_date"),
-  closeDate: text("close_date"),
+  solicitationId: integer("solicitation_id"), // External ID, unknown constraints
+  solicitationTitle: varchar("solicitation_title", { length: 255 }).notNull(), // allegedly mandatory, 1-255 chars
+  solicitationNumber: varchar("solicitation_number", { length: 50 }), // Doc lies, this is more than 20 chars, ex: "HHS-2025-ACL-NIDILRR-BISB-0109"
+  program: text("program"), // SBIR, STTR, or BOTH
+  phase: varchar("phase", { length: 20 }), // Doc lies, phase is Phase I, Phase II, or BOTH
+  agency: text("agency"), // ex: DOD
+  branch: text("branch"), // ex: USAF
+  solicitationYear: integer("solicitation_year"), // ex: 2024
+  // Dates are YYYY/MM/DD format
+  // ex: 1967/07/18
+  releaseDate: date("release_date"),
+  openDate: date("open_date"),
+  closeDate: date("close_date"),
+  applicationDueDate: date("application_due_date").array(), // Doc lies, this is an array of dates and not a single date
+  occurrence_number: varchar("occurrence_number", { length: 2 }), // Offically length of 2, "A sequence number given to the solicitation for that agency/program/year combination"
+  solicitationAgencyURL: text("solicitation_agency_url"), // Any length
+  currentStatus: text("current_status"), // current status is 4-6 chars: Open, Closed, or Future but not mandatory
 });
 
 export type SolicitationSelect = typeof solicitations.$inferSelect;
