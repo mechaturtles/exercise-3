@@ -3,7 +3,7 @@ import axios from "axios";
 import db from "@repo/database";
 import { solicitations, SolicitationInsert, SolicitationInsertSchema,
    topics, TopicInsert, TopicInsertSchema, subtopics, SubtopicInsert, SubtopicInsertSchema } from "@repo/database";
-import { eq } from "drizzle-orm";
+import { sql } from "drizzle-orm/sql";
 
 async function fetchSolicitationsByPagination(start: number, rows: number) {
   // No query strings because wrong order such as
@@ -46,9 +46,8 @@ async function fetchAllSolicitations() {
 
 async function main() {
   // Delete all existing data
-  await db.delete(subtopics);
-  await db.delete(topics);
-  await db.delete(solicitations);
+  // Faster than db.delete for our needs
+  await db.execute(sql`TRUNCATE TABLE subtopics, topics, solicitations RESTART IDENTITY CASCADE`);
 
   // Fetch all data with pagination
   const solData = await fetchAllSolicitations();
@@ -68,6 +67,10 @@ async function main() {
         releaseDate: s.release_date,
         openDate: s.open_date,
         closeDate: s.close_date,
+        applicationDueDate: s.application_due_date,
+        occurrence_number: s.occurrence_number,
+        solicitationAgencyURL: s.solicitation_agency_url,
+        currentStatus: s.current_status,
       }).returning({ id: solicitations.id });
 
       for (const t of s.solicitation_topics ?? []) {
