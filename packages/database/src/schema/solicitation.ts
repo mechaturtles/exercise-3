@@ -4,12 +4,12 @@ import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 export const solicitations = pgTable("solicitations", {
   id: serial("id").primaryKey(), // Local PK, don't trust external
   solicitationId: integer("solicitation_id"), // External ID, unknown constraints
-  solicitationTitle: varchar("solicitation_title", { length: 255 }).notNull(), // allegedly mandatory, 1-255 chars
+  solicitationTitle: text("solicitation_title").notNull(), // Officially 1-255 chars, but don't trust it
   solicitationNumber: varchar("solicitation_number", { length: 50 }), // Doc lies, this is more than 20 chars, ex: "HHS-2025-ACL-NIDILRR-BISB-0109"
   program: text("program"), // SBIR, STTR, or BOTH
   phase: varchar("phase", { length: 20 }), // Doc lies, phase is Phase I, Phase II, or BOTH
-  agency: text("agency"), // ex: DOD
-  branch: text("branch"), // ex: USAF
+  agency: varchar("agency", { length: 6 }), // Officially 2-4 chars, ex: DOD
+  branch: varchar("branch", { length: 6 }), // Officially 2-4 chars, ex: "USAF"
   solicitationYear: integer("solicitation_year"), // ex: 2024
   // Dates are YYYY/MM/DD format
   // ex: 1967/07/18
@@ -28,15 +28,17 @@ export const SolicitationSelectSchema = createSelectSchema(solicitations);
 export const SolicitationInsertSchema = createInsertSchema(solicitations);
 
 export const topics = pgTable("topics", {
-  id: serial("id").primaryKey(),
+  id: serial("id").primaryKey(), 
   solicitationFK: integer("solicitation_fk").references(() => solicitations.id), // FK reference to local solicitations id
-  topicTitle: text("topic_title"),
-  topicNumber: text("topic_number"),
-  branch: text("branch"),
-  topicOpenDate: text("topic_open_date"),
-  topicClosedDate: text("topic_closed_date"),
-  topicDescription: text("topic_description"),
-  sbirTopicLink: text("sbir_topic_link"),
+  topicTitle: text("topic_title"), // Doc lies, officially mandatory 0-255 chars but is nullable and longer in practice
+  topicNumber: varchar("topic_number", { length: 60 }), // Doc lies, offically 0-15 chars but is longer in practice ex: RF-HL-26-014
+  branch: varchar("branch", { length: 6 }), // Officially 2-4 chars, ex: "USAF"
+  // Dates are YYYY/MM/DD format
+  // ex: 1967/07/18
+  topicOpenDate: date("topic_open_date"),
+  topicClosedDate: date("topic_closed_date"),
+  topicDescription: text("topic_description"), // Any length
+  sbirTopicLink: text("sbir_topic_link"), // Any length
 });
 
 export type TopicSelect = typeof topics.$inferSelect;
@@ -48,11 +50,11 @@ export const TopicInsertSchema = createInsertSchema(topics);
 export const subtopics = pgTable("subtopics", {
   id: serial("id").primaryKey(),
   topicFK: integer("topic_fk").references(() => topics.id), // FK reference to local topics id
-  subtopicTitle: text("subtopic_title"),
-  branch: text("branch"),
-  subtopicNumber: text("subtopic_number"),
-  subtopicDescription: text("subtopic_description"),
-  sbirSubtopicLink: text("sbir_subtopic_link"),
+  subtopicTitle: text("subtopic_title").notNull(), // Doc lies, officially 0-255 chars but is longer in practice
+  branch: varchar("branch", { length: 6 }), // Officially 2-4 chars, ex: "USAF"
+  subtopicNumber: varchar("subtopic_number", { length: 20 }), // Offically 0-15 chars, alphanumeric
+  subtopicDescription: text("subtopic_description"), // Any length
+  sbirSubtopicLink: text("sbir_subtopic_link"), // Any length
 });
 
 export type SubtopicSelect = typeof subtopics.$inferSelect;
