@@ -5,9 +5,9 @@ import { Input } from "@repo/ui/components/input";
 import { Button } from "@repo/ui/components/button";
 import { Card, CardHeader, CardContent, CardTitle } from "@repo/ui/components/card";
 import { useAPI } from "trpc/hooks";
-import { SolicitationGetByIdRes } from "@repo/api-server";
+import { SolicitationSearchRes } from "@repo/api-server";
 
-function SolicitationCard({ solicitation }: { solicitation: SolicitationGetByIdRes }) {
+function SolicitationCard({ solicitation }: { solicitation: SolicitationSearchRes[number] }) {
   return (
     <Card>
       <CardHeader>
@@ -25,20 +25,20 @@ function SolicitationCard({ solicitation }: { solicitation: SolicitationGetByIdR
 export default function SearchSolicitation() {
   const api = useAPI();
 
-  const [solicitationId, setSolicitationId] = useState("");
-  const [result, setResult] = useState<SolicitationGetByIdRes>();
+  const [keywords, setKeywords] = useState("");
+  const [searchResult, setSearchResult] = useState<SolicitationSearchRes>([]);
 
   const handleSearch = async () => {
-    const res = await api.solicitation.getById.query({ id: parseInt(solicitationId, 10) });
-    setResult(res);
+    const res = await api.solicitation.search.query({ keywords });
+    setSearchResult(res);
   };
 
   return (
     <div>
       <Input
-        placeholder="Enter Solicitation ID"
-        value={solicitationId}
-        onChange={(e) => setSolicitationId(e.target.value)}
+        placeholder="Enter solicitation keywords"
+        value={keywords}
+        onChange={(e) => setKeywords(e.target.value)}
         onKeyDown={(e) => {
           if (e.key === "Enter") {
             handleSearch();
@@ -47,7 +47,13 @@ export default function SearchSolicitation() {
       />
       <Button onClick={handleSearch}>Search</Button>
 
-      {result && <SolicitationCard solicitation={result} />}
+      {searchResult.length > 0 && (
+        <div>
+          {searchResult.map((solicitation) => (
+            <SolicitationCard key={solicitation.id} solicitation={solicitation} />
+          ))}
+        </div>
+      )}
     </div>
   );
 }
