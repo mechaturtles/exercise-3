@@ -19,6 +19,7 @@
   "devDependencies": {
     "@repo/eslint-config": "workspace:*",
     "@repo/tsconfig": "workspace:*",
+    "ts-node": "^10.9.1",
     "tsx": "^4.19.3"
   }
 }
