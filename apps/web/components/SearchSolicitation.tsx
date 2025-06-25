@@ -5,15 +5,8 @@ import { Input } from "@repo/ui/components/input";
 import { Button } from "@repo/ui/components/button";
 import { Card, CardHeader, CardContent, CardTitle } from "@repo/ui/components/card";
 import { Dialog, DialogContent, DialogOverlay, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogClose } from "@repo/ui/components/dialog";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectLabel,
-  SelectTrigger,
-  SelectValue,
-} from "@repo/ui/components/select";
+import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@repo/ui/components/select";
+import { Pagination, PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@repo/ui/components/pagination"
 import { useAPI } from "trpc/hooks";
 import { SolicitationSearchRes, TopicsSearchRes } from "@repo/api-server";
 
@@ -43,7 +36,7 @@ function TopicCard({ topic, onClick }: { topic: TopicsSearchRes[number]; onClick
         <p>{topic.topicDescription?.slice(0, 100)}{topic.topicDescription && topic.topicDescription.length > 100 ? "..." : ""}</p>
         <p>Agency: {topic.solicitation?.agency ? `${AGENCY_DICTIONARY[topic.solicitation.agency] || topic.solicitation.agency}` : "N/A"}</p>
         <p>Branch: {topic.branch}</p>
-        <p>Open date: {topic.topicOpenDate} Closed date: {topic.topicClosedDate}</p>
+        <p>Open date: {topic.solicitation?.openDate} Closed date: {topic.solicitation?.closeDate}</p>
         <p>Topic number: {topic.topicNumber}</p>
         <p>ID: {topic.id}</p>
         <p>Solicitation: {topic.solicitation?.solicitationTitle}</p>
@@ -163,6 +156,8 @@ export default function SearchSolicitation() {
   const api = useAPI();
 
   // Filters
+  const [limit, setLimit] = useState(20);
+  const [offset, setOffset] = useState(0);
   const [keywords, setKeywords] = useState("");
   const [selectTopicOrSolicitation, setSelectTopicOrSolicitation] = useState<"topic" | "solicitation">("topic");
   const [agency, setAgency] = useState("");
@@ -177,8 +172,13 @@ export default function SearchSolicitation() {
   const [selectedTopic, setSelectedTopic] = useState<TopicsSearchRes[number] | null>(null);
 
   const handleSearch = async () => {
-    const res = await api.solicitation.searchTopics.query({ keywords, solicitation: { agency } });
+    const res = await api.solicitation.searchTopics.query({ limit, offset, keywords, solicitation: { agency } });
     setTopicSearchResult(res);
+  };
+
+  const handlePagination = async (newOffset: number) => {
+    setOffset(newOffset);
+    await handleSearch();
   };
 
   const handleCardClick = async (solicitation: SolicitationSearchRes[number]) => {
@@ -226,7 +226,7 @@ export default function SearchSolicitation() {
             style={{ flex: 1 }}
           />
           <Select value={agency} onValueChange={(value) => setAgency(value)}>
-            <SelectTrigger className="w-[180px]">
+            <SelectTrigger className="w-[200px]">
               <SelectValue placeholder="Select an agency" />
             </SelectTrigger>
             <SelectContent>
@@ -284,6 +284,29 @@ export default function SearchSolicitation() {
           onClose={() => setSelectedTopic(null)}
         />
       )}
+
+      <Pagination>
+        <PaginationPrevious  onClick={() => handlePagination(Math.max(0, offset - limit))}> Previous </PaginationPrevious>
+        <PaginationContent>
+          { offset !== 0 && (
+            <PaginationItem>
+              <PaginationLink>{offset/limit}</PaginationLink>
+            </PaginationItem>
+          )}
+          <PaginationItem>
+            <PaginationLink isActive>{offset/limit + 1}</PaginationLink>
+          </PaginationItem>
+          <PaginationItem>
+            <PaginationLink>{offset/limit + 2}</PaginationLink>
+          </PaginationItem>
+          { offset === 0 && (
+            <PaginationItem>
+              <PaginationLink>{offset/limit + 3}</PaginationLink>
+            </PaginationItem>
+          )}
+        </PaginationContent>
+        <PaginationNext onClick={() => handlePagination(offset + limit)}></PaginationNext>
+      </Pagination>
     </div>
   );
 }
